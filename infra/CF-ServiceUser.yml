@@ -1,0 +1,27 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: AWS CloudFormation Service User
+Metadata:
+  Purpose: >-
+    Creates a user for CloudFormation Service.
+  License: >-
+    Any code, applications, scripts, templates, proofs of concept, documentation
+    and other items provided by AWS under this SOW are "AWS Content," as defined
+    in the Agreement, and are provided for illustration purposes only. All such
+    AWS Content is provided solely at the option of AWS, and is subject to the
+    terms of the Addendum and the Agreement. Customer is solely responsible for
+    using, deploying, testing, and supporting any code and applications provided
+    by AWS under this SOW.
+Resources:
+  ServiceUser:
+    Type: AWS::IAM::User
+  ServiceKeys:
+    Type: AWS::IAM::AccessKey
+    Properties:
+      UserName: !Ref 'ServiceUser'
+Outputs:
+  AccessKey:
+    Value: !Ref 'ServiceKeys'
+    Description: AWSAccessKeyId of Service User
+  SecretKey:
+    Value: !GetAtt [ServiceKeys, SecretAccessKey]
+    Description: AWSSecretAccessKey of Service User

@@ -1,0 +1,258 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: AWS CloudFormation Service Execution Role
+Metadata:
+  Purpose: >-
+    Creates a role for CloudFormation Service which allows
+    CloudFormation to create/update/delete resources in AWS account
+    Creates a CrossAccountPassRole which allows Principals
+    in the SharedServices account to assume the PassRole.
+    This allows the PassRole to be able to pass the ExecutionRole to CloudFormation
+    CloudFormaiton will then use this Role to create resources
+  License: >-
+    Any code, applications, scripts, templates, proofs of concept, documentation
+    and other items provided by AWS under this SOW are "AWS Content," as defined
+    in the Agreement, and are provided for illustration purposes only. All such
+    AWS Content is provided solely at the option of AWS, and is subject to the
+    terms of the Addendum and the Agreement. Customer is solely responsible for
+    using, deploying, testing, and supporting any code and applications provided
+    by AWS under this SOW.
+Parameters:
+  CFExecutionRoleName:
+    Type: String
+    Default: dm-svcr-EvaluationCFExecutionRole
+Resources:
+  EvaluationCloudFormationExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Ref CFExecutionRoleName
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+        -
+          Effect: Allow
+          Principal:
+            Service:
+              # Only CloudFormation service can assume this role
+              # No one else can assume this role
+              - cloudformation.amazonaws.com
+          Action:
+            - sts:AssumeRole
+  EvaluationCloudFormationExecutionPolicy:
+    Type: AWS::IAM::ManagedPolicy
+    Properties:
+      Description: allows cloudformation to create/update/delete IAM Roles
+      ManagedPolicyName: dm-svcp-Evaluation-CloudFormationExecutionRolePolicy
+      Roles:
+        - !Ref EvaluationCloudFormationExecutionRole
+      PolicyDocument:
+        Version: 2012-10-17
+        Statement:
+        -
+          # Needed for creating Roles for Lambdas, EC2 instances and other services
+          Sid: IAMRolesPermissions
+          Effect: Allow
+          Action:
+            - iam:Get*
+            - iam:List*
+            - iam:*Role*
+            - iam:CreatePolicy
+            - iam:DeletePolicy
+            - iam:*PolicyVersion*
+            - iam:*InstanceProfile*
+          Resource: '*'
+        -
+            Sid: KMSPermissions
+            Effect: Allow
+            Action:
+              - kms:DescribeKey
+              - kms:GetKeyPolicy
+              - kms:List*
+              - kms:Encrypt
+              - kms:Decrypt
+              - kms:ReEncrypt*
+              - kms:Generate*
+              - kms:*Grant
+              - kms:TagResource
+              - kms:CreateKey
+              - kms:CreateAlias
+              - kms:DeleteAlias
+            Resource: '*'
+        -
+          Sid: S3Permissions
+          Effect: Allow
+          Action:
+            - s3:GetBucket*
+            - s3:PutBucket*
+            - s3:CreateBucket
+            - s3:DeleteBucket
+            - s3:DeleteBucketPolicy
+            - s3:GetInventoryConfiguration
+            - s3:GetLifecycleConfiguration
+            - s3:GetMetricsConfiguration
+            - s3:GetObject
+            - s3:GetObjectAcl
+            - s3:GetReplicationConfiguration
+            - s3:HeadBucket
+            - s3:ListBucket
+            - s3:ObjectOwnerOverrideToBucketOwner
+            - s3:PutAccelerateConfiguration
+            - s3:PutAnalyticsConfiguration
+            - s3:PutInventoryConfiguration
+            - s3:PutLifecycleConfiguration
+            - s3:PutMetricsConfiguration
+            - s3:PutReplicationConfiguration
+            - s3:DeleteBucketWebsite
+            - s3:GetEncryptionConfiguration
+            - s3:PutEncryptionConfiguration
+          Resource: '*'
+        -
+          Sid: RDSPermissions
+          Effect: Allow
+          Action:
+            - rds:CreateDBInstance
+            - rds:*Tags*
+            - rds:Copy*
+            - rds:CreateDBClusterParameterGroup
+            - rds:CreateDBClusterSnapshot
+            - rds:CreateDBInstance
+            - rds:CreateDBInstanceReadReplica
+            - rds:CreateDBParameterGroup
+            - rds:CreateDBSecurityGroup
+            - rds:CreateDBSnapshot
+            - rds:CreateDBSubnetGroup
+            - rds:CreateEventSubscription
+            - rds:CreateOptionGroup
+            - rds:Delete*
+            - rds:Describe*
+            - rds:Modify*
+            - rds:Reset*
+            - rds:Restore*
+            - rds:AuthorizeDBSecurityGroupIngress
+            - rds:RevokeDBSecurityGroupIngress
+            - rds:StartDBInstance
+            - rds:StopDBInstance
+            - rds:CreateDBCluster
+          Resource: '*'
+        -
+          Sid: Lambda
+          Effect: Allow
+          Action:
+            - lambda:*
+          Resource: '*'
+        -
+          Sid: APIGateway
+          Effect: Allow
+          Action:
+            - execute-api:InvalidateCache
+            - execute-api:Invoke
+            - apigateway:*
+          Resource: '*'
+        -
+          Sid: SNS
+          Effect: Allow
+          Action:
+            - sns:*
+          Resource: '*'
+        -
+          Sid: SQS
+          Effect: Allow
+          Action:
+            - sqs:*
+          Resource: '*'
+        -
+          Sid: DynamoDB
+          Effect: Allow
+          Action:
+            - dynamodb:*
+          Resource: '*'
+        -
+          Sid: Kinesis
+          Effect: Allow
+          Action:
+            - kinesis:*
+          Resource: '*'
+        -
+          Sid: CloudFormation
+          Effect: Allow
+          Action:
+            - cloudformation:*
+          Resource: '*'
+        -
+          Sid: SecretsManagement
+          Effect: Allow
+          Action:
+            - secretsmanager:*
+            - ssm:*Parameter*
+          Resource: '*'
+        -
+          Sid: CloudFront
+          Effect: Allow
+          Action:
+            - cloudfront:*
+            - waf:*
+            - shield:*
+          Resource: '*'
+        -
+          Sid: Route53AndDNS
+          Effect: Allow
+          Action:
+            - route53:*
+            - route53domains:*
+            - servicediscovery:*
+          Resource: '*'
+        -
+          Sid: CloudWatch
+          Effect: Allow
+          Action:
+            - cloudwatch:*
+            - logs:*
+            - events:*
+          Resource: '*'
+        -
+          Sid: AutoScaling
+          Effect: Allow
+          Action:
+            - autoscaling:*
+            - application-autoscaling:*
+            - autoscaling-plans:*
+          Resource: '*'
+        -
+          Sid: CodeTools
+          Effect: Allow
+          Action:
+            - codebuild:*
+            - codepipeline:*
+            - codedeploy:*
+          Resource: '*'
+        -
+          Sid: CodeBuild
+          Effect: Allow
+          Action:
+            - codebuild:*
+          Resource: '*'
+        -
+          Sid: CloudTrail
+          Effect: Allow
+          Action:
+            - cloudtrail:*
+          Resource: '*'
+        -
+          Sid: ContainerPermissions
+          Effect: Allow
+          Action:
+            - ecr:*
+          Resource: '*'
+        -
+          Sid: UpdateServicePermissions
+          Effect: Allow
+          Action:
+            - ecs:List*
+            - ecs:Describe*
+            - ecs:UpdateService
+          Resource: '*'
+Outputs:
+  EvaluationCloudFormationExecutionRoleArn:
+    Value: !GetAtt EvaluationCloudFormationExecutionRole.Arn
+    Description: ARN for CloudFormation Execution Role
+    Export:
+      Name: !Sub 'Evaluation-CloudFormationExecutionRole'
