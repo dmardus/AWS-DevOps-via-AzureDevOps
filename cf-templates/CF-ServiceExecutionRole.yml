@@ -19,9 +19,9 @@ Metadata:
 Parameters:
   CFExecutionRoleName:
     Type: String
-    Default: dm-svcr-EvaluationCFExecutionRole
+    Default: dm-svcr-CFExecutionRole
 Resources:
-  EvaluationCloudFormationExecutionRole:
+  CloudFormationExecutionRole:
     Type: AWS::IAM::Role
     Properties:
       RoleName: !Ref CFExecutionRoleName
@@ -37,13 +37,13 @@ Resources:
               - cloudformation.amazonaws.com
           Action:
             - sts:AssumeRole
-  EvaluationCloudFormationExecutionPolicy:
+  CloudFormationExecutionPolicy:
     Type: AWS::IAM::ManagedPolicy
     Properties:
       Description: allows cloudformation to create/update/delete IAM Roles
-      ManagedPolicyName: dm-svcp-Evaluation-CloudFormationExecutionRolePolicy
+      ManagedPolicyName: dm-svcp-CloudFormationExecutionRolePolicy
       Roles:
-        - !Ref EvaluationCloudFormationExecutionRole
+        - !Ref CloudFormationExecutionRole
       PolicyDocument:
         Version: 2012-10-17
         Statement:
@@ -229,8 +229,8 @@ Resources:
             - ecs:UpdateService
           Resource: '*'
 Outputs:
-  EvaluationCloudFormationExecutionRoleArn:
-    Value: !GetAtt EvaluationCloudFormationExecutionRole.Arn
+  CloudFormationExecutionRoleArn:
+    Value: !GetAtt CloudFormationExecutionRole.Arn
     Description: ARN for CloudFormation Execution Role
     Export:
-      Name: !Sub 'Evaluation-CloudFormationExecutionRole'
+      Name: !Sub 'DM-CloudFormationExecutionRole'
